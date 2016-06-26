@@ -1,0 +1,84 @@
+﻿<!--                                                                                       
+* ******************************************************************************************
+* File:           InvadersView.xaml                                                        *
+*                                                                                          *
+* Author:         Gregory Weiner                                                           *
+* Version:        1.0 8.01.2012                                                            *
+* Last Modified:  2.02.2013                                                                *
+* License:        Free Software (GNU License Included)                                     *
+* Purpose:        This is a clone of the classic space shooter game 'Invaders,'            *
+*                 written from scratch in C# for the WPF platform. A real-time             *
+*                 shooter game, the player scores points by destroying incoming            *
+*                 alien invaders, and loses if the invaders collide with the player        *
+*                 or reach the bottom of the screen.                                       *
+*                                                                                          *
+*                 This Application follows the model view viewmodel design pattern,        *
+*                 in which the game logic occurs in the model layer (written in C#),       *
+*                 the display and binding logic happens in the view layer (written in      *
+*                 xaml), and the viewmodel is the pipeline that provides communication     *
+*                 between the two aforementioned layers. This allows for better            *
+*                 portability of the business logic, and better compartmentalization of    *
+*                 code overall.                                                            *
+*                                                                                          *
+* Description:    This is the View Layer of the Program, responsible for display,          *
+*                 written in XAML.                                                         *
+*                                                                                          *
+* Input:          Arrow keys for movement, Space key to shoot, P to pause.                 *
+*                                                                                          *
+* Requirements:   Requires a functioning keyboard for input.                               *
+*                 Runs in windowed mode.                                                   *
+*                                                                                          *
+* ******************************************************************************************
+-->
+
+<Window x:Class="Invaders.View.InvadersView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Invaders.ViewModel"
+        xmlns:v="clr-namespace:Invaders.View"
+        
+    Title="MainWindow" Height="800" Width="1000" KeyDown="Window_KeyDown" SizeChanged="Window_SizeChanged" ResizeMode="CanMinimize">
+
+    <!--Instantiate the object to be used as resource here:-->
+    <Window.Resources>
+        <vm:InvadersViewModel x:Key="viewModel"/>
+        <vm:BooleanConverter x:Key="visibilityConverter"/>
+    </Window.Resources>
+
+    <Grid DataContext="{StaticResource viewModel}" Background="Black" Margin="0,0,10,0" >
+        <StackPanel Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <TextBlock x:Name="Score" Text="{Binding Score}" Foreground="#FFF9FFFC" FontSize="30"/>
+            <TextBlock x:Name="lives" Text="{Binding Lives}" Foreground="#FFF9FFFC"/>
+        </StackPanel>
+        
+        <Border x:Name="playArea" BorderBrush="Blue" Background="Black" CornerRadius="10" 
+                BorderThickness="2" Margin="1" Grid.Row="1" Loaded="playArea_Loaded">
+            <Grid Width="{Binding ElementName=border, Path=ActualWidth}" 
+                Height="{Binding ElementName=border, Path=ActualHeight}">
+                <Canvas x:Name="canvas" Background="Black">
+                    <ItemsControl ItemsSource="{Binding Path=Sprites}" >
+                                 <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                <Canvas HorizontalAlignment="Center" VerticalAlignment="Center">
+                                </Canvas>
+                                     </ItemsPanelTemplate>
+                                 </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+
+                        <TextBlock x:Name="gameOverText" Text="GAME OVER" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Visibility="{Binding GameOver, Converter={StaticResource visibilityConverter}}"
+                               FontWeight="ExtraBold" 
+                           Foreground="Red" FontStretch="Normal"/>
+                        <TextBlock x:Name="shootToStart" Text="Shoot to start" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding GameOver, Converter={StaticResource visibilityConverter}}"
+                                FontSize="30" Foreground="Azure" FontStyle="Italic" FontFamily="Hal"/>
+                    <TextBlock x:Name="pausedText" HorizontalAlignment="Center" VerticalAlignment="Center" Text="PAUSED"
+                   Visibility="{Binding Paused,Converter={StaticResource visibilityConverter}}" 
+                   FontSize="50" FontWeight="ExtraBold" Opacity="0.7"  Foreground="#FFF9FFFC"/>
+                        
+                </Canvas>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
+        
