@@ -1,0 +1,26 @@
+3D MODEL BINARY CONVERTER                                                                
+                                                                                              
+Author:         Gregory Weiner                                                                
+Version:        1.0 1.15.2016                                                                                                                                 
+License:        Free Software (GNU License Included)      
+                                    
+Purpose:  This is a console application designed to read and parse 3D models in the     
+                popular .obj format and output them as a custom .BinaryMesh file format,      
+                and as a simple .txt file containing lists of vertices, indices, and normal values for use 
+                with my 3D game engine.									    
+                Output file formats are .BinaryMesh and .txt. The BinaryMesh format was created because 
+                it makes for much faster loading of 3D meshes into the main game engine.
+ 																	
+Note:	This is a work in progress and still needs to be made more robust in order to	
+                handle .obj files that whose vertex and index lists have been arranged        
+	differently. For example, extra spaces, or different numbers of vertices/     
+	indices/normals per line can throw off the parser. Also, it still has trouble 
+	handling lists of quadrilaterals and n-gons, and currently only handles       
+	triangle lists correctly.														
+																								
+Input:       Copy and paste or directly type file names into the console window.		    
+																							    
+Output:	Will produce TWO files, a custom txt and a .BinaryMesh file.				    
+	Output file name is model.BinaryMesh and model.txt						    
+                                                                                              
+Requirements: Latest Visual C++ compiler recommended.
