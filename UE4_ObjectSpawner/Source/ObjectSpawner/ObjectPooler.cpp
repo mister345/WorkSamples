@@ -53,44 +53,35 @@ void UObjectPooler::Initialize(
 	m_velocityDamper = velocityDamper;
 		
 	// Avoid multiple allocations while iterating
-	m_objectInfo.Reserve( m_poolSize ); 
-	m_objectPool.Reserve( m_poolSize );
+	m_objectPool.Reserve( m_poolSize ); 
 
 	/// POPULATE OBJECT POOL AND PARALLEL OBJINFO ARRAY ///
 	for ( int i = 0; i < m_poolSize; i++ )
 	{
 		int lifeTime = 0;
-		//	NOTE - for SPARKLER Effect, set lifetime = 0
-		//		   For BASIC VERSION, start it with a random lifetime.
-		//int lifeTime = RandomInt( m_minLife, m_maxLife );	
 
 		// Populate array of structs with pooling and movement info about objects
 		FObjInfo info;
-		info.init( lifeTime );
+		info.init( lifeTime, m_center );
 
 		// Spawn actual objects into world for reuse in pool
-		AActor* pParticle = pWorld->SpawnActor(classType);
-		m_objectPool.Add( pParticle );
-		// NOTE - For BASIC VERSION, should give actor a random location.
-		//pParticle->SetActorLocation( RandomLocation() );
-		
-		// Give awareness of each actor to elements in objInfo array
-		info.pActor = pParticle;
-		m_objectInfo.Add( info );
+		AActor* pActor = pWorld->SpawnActor(classType);
+		info.pActor = pActor;
+		m_objectPool.Add( info );
 	}
 
 	/// SET UP LINKS BETWEEN ELEMENTS IN OBJINFO ARRAY ///
-	m_pFirstAvailable = &(m_objectInfo[ 0 ]);
+	m_pFirstAvailable = &(m_objectPool[ 0 ]);
 
 	// Link the array of objectInfos together
 	for ( int i = 0; i < m_poolSize - 1; i++ )
 	{
-		m_objectInfo[ i ].setNext( &(m_objectInfo[ i + 1 ]) );
+		m_objectPool[ i ].setNext( &(m_objectPool[ i + 1 ]) );
 	}
 
 	// The last one terminates the list.
 	int nextToLast = m_poolSize - 1;
-	m_objectInfo[ nextToLast ].setNext( NULL );
+	m_objectPool[ nextToLast ].setNext( NULL );
 }
 
 //////////// SPAWNING RELATED FUNCTIONS /////////////
@@ -102,15 +93,7 @@ void UObjectPooler::Initialize(
 			  FObjInfo* pNew = m_pFirstAvailable;
 			  m_pFirstAvailable = pNew->getNext();
 
-			  //////// USED FOR SPARKLER VERSION ////////
-			  pNew->init(RandomInt( m_minLife, m_maxLife ),RandomTrajectory());
-			  pNew->pActor->SetActorLocation( m_center );
-
-			  //////// USED FOR BASIC VERSION ///////////
-			  //pNew->init(RandomInt( m_minLife, m_maxLife ) );
-			  //pNew->pActor->SetActorLocation( RandomLocation() );
-
-			  pNew->pActor->SetActorHiddenInGame( false );
+			  pNew->init(RandomInt( m_minLife, m_maxLife ), m_center, RandomTrajectory());
 		}
 	}
 	
@@ -120,30 +103,17 @@ void UObjectPooler::Initialize(
 		for ( int i = 0; i < m_poolSize; i++ )
 		{
 			// IF DEAD
-			if ( !m_objectInfo[ i ].alive() )
+			if ( !m_objectPool[ i ].alive() )
 			{
-				m_objectInfo[ i ].pActor->SetActorHiddenInGame( true );
+				m_objectPool[ i ].deactivate();
 
 				// Add this object to the front of the list.
-				m_objectInfo[ i ].setNext( m_pFirstAvailable );
-				m_pFirstAvailable = &( m_objectInfo[ i ] );
+				m_objectPool[ i ].setNext( m_pFirstAvailable );
+				m_pFirstAvailable = &( m_objectPool[ i ] );
 			}
 			else // IF ALIVE
 			{
-				m_objectInfo[ i ].update( DeltaTime );
-
-				//////// SPECIFIC TO SPARKLER VERSION ////////
-				FVector pos = m_objectPool[ i ]->GetActorLocation();
-				if ( m_bounds.IsInside( pos ) )
-				{
-					FVector newLocation = pos + m_objectInfo[ i ].velocity * DeltaTime;
-					m_objectPool[ i ]->SetActorLocation( newLocation );
-				}
-				else
-				{
-					m_objectPool[ i ]->SetActorHiddenInGame( true );
-					m_objectInfo[ i ].kill();
-				}
+				m_objectPool[ i ].update( m_bounds, DeltaTime );
 			}
 		}
 	}
