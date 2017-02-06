@@ -23,7 +23,7 @@
  REQUIREMENTS: 																					   
 	Unreal Engine Version 4.14.3																	   
 	"Shape_Sphere.uasset", "M_Basic_Wall.uasset"													   
-		these asset files are included in the source folder, and must be placed in the appropriate 	   
+		These asset files are included in the source folder, and must be placed in the appropriate 	   
 		directories for the Particle object to render properly, otherwise, start an empty project with 
 		starter content in Unreal Editor, and they will be generated automatically.					   
 																									   
